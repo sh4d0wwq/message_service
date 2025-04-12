@@ -8,7 +8,6 @@ class ChatWebSocketHandler:
     def __init__(self):
         self.router = APIRouter()
         self.active_connections: dict[int, list[WebSocket]] = {}
-
         self.router.add_api_websocket_route(
             "/ws/chat/{chat_id}",
             self.websocket_endpoint
