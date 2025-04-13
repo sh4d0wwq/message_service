@@ -1,21 +1,20 @@
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
-from ..dependencies import get_db, get_current_user_id
-from ..models.message import MessageCreate
+from ..dependencies import get_current_user_id, get_message_service, get_chat_service
 from ..services.message_service import MessageService
-from ..repositories.message_repository import MessageRepository
+from ..services.chat_service import ChatService
 
-class UserAPI:
+class MessageAPI:
     def __init__(self):
-        self.router = APIRouter(prefix="/messages", tags=["Messages"])
+        self.router = APIRouter(prefix="/msg", tags=["Messages"])
         self.router.add_api_route("/{contact_id}", self.get_conversation, methods=["GET"])
+        self.router.add_api_route("/p/{user_id}", self.get_private_chat, methods=["POST"])
 
-    def get_message_service(self, db: Session) -> MessageService:
-        return MessageService(MessageRepository(db))
+    def get_private_chat(self, user_id: int, chat_service: ChatService = Depends(get_chat_service), sender_id: int = Depends(get_current_user_id)):
+        chat = chat_service.get_private_chat(user_id, sender_id)
+        return {"chat_id": chat.chat_id}
 
-    def get_conversation(self, contact_id: int, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
-        message_service = self.get_message_service(db)
+    def get_conversation(self, contact_id: int, user_id: int = Depends(get_current_user_id), message_service: MessageService = Depends(get_message_service)):
         return message_service.get_conversation(user_id, contact_id)
 
-user_api = UserAPI()
-router = user_api.router    
+message_api = MessageAPI()
+router = message_api.router    

@@ -1,7 +1,9 @@
 from fastapi import WebSocket, WebSocketDisconnect, Depends, APIRouter
-from ..dependencies import get_current_user_id, get_message_service
-from ..services.chat_client import is_user_in_chat
-from ..models.message import MessageCreate
+from ..dependencies import get_current_user_id, get_message_service, get_db
+from ..schemas.message import MessageCreate
+from ..services.chat_user_service import ChatUserService
+from ..services.message_service import MessageService
+from ..repositories.chat_user_repository import ChatUserRepository
 import json
 
 class ChatWebSocketHandler:
@@ -13,19 +15,24 @@ class ChatWebSocketHandler:
             self.websocket_endpoint
         )
 
+    def get_chat_user_service(self, db): 
+        return ChatUserService(ChatUserRepository(db))
+
     async def websocket_endpoint(
         self,
         websocket: WebSocket,
         chat_id: int,
         user_id: int = Depends(get_current_user_id),
-        message_service = Depends(get_message_service)
+        message_service: MessageService = Depends(get_message_service),
+        db = Depends(get_db)
     ):
-        await self.connect(chat_id, websocket, user_id, message_service)
+        chat_user_service = self.get_chat_user_service(db)
+        await self.connect(chat_id, websocket, user_id, message_service, chat_user_service)
 
-    async def connect(self, chat_id: int, websocket: WebSocket, user_id, message_service):
+    async def connect(self, chat_id: int, websocket: WebSocket, user_id, message_service: MessageService, chat_user_service: ChatUserService):
         await websocket.accept()
 
-        if not await is_user_in_chat(user_id, chat_id):
+        if not chat_user_service.is_user_in_chat(user_id, chat_id):
             await websocket.close(code=1008)
             return
 

@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
-from ..models.message import Message, MessageCreate
+from ..models.message import Message
+from ..schemas.message import MessageCreate
 
 class MessageRepository:
     def __init__(self, db: Session):

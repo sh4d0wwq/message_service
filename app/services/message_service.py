@@ -1,5 +1,5 @@
 from ..repositories.message_repository import MessageRepository
-from ..models.message import MessageCreate
+from ..schemas.message import MessageCreate
 
 class MessageService:
     def __init__(self, message_repo: MessageRepository):
