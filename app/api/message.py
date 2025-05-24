@@ -77,7 +77,6 @@ class MessageAPI:
             chat_service: ChatService = Depends(get_chat_service), 
             sender_id: int = Depends(get_current_user_id)
     ):
-        """Создает/возвращает приватный чат между двумя пользователями."""
         if sender_id == user_id:
             return {"response": "Error"}
         chat = chat_service.get_private_chat(user_id, sender_id)
@@ -89,7 +88,6 @@ class MessageAPI:
             chat_service: ChatService = Depends(get_chat_service), 
             cur_user_id: int = Depends(get_current_user_id)
     ):
-        """Создает групповой чат с заданными пользователями и названием."""
         user_ids = request.user_ids
         user_ids.append(cur_user_id)
         return chat_service.create_group_chat(user_ids, request.chat_name)
@@ -101,7 +99,6 @@ class MessageAPI:
             limit: int = Query(20), 
             offset: int = Query(0)
     ):
-        """Возвращает сообщения из чата."""
         return {"messages": message_service.get_conversation(chat_id, limit, offset)}
 
     def get_user_chats(
@@ -109,14 +106,12 @@ class MessageAPI:
             user_id: int = Depends(get_current_user_id), 
             chat_user_service: ChatUserService = Depends(get_chat_user_service)
     ):
-        """Получить все чаты текущего пользователя."""
         return chat_user_service.get_user_chats(user_id)
     
     async def upload_file(
             self, 
             file: UploadFile = File(...)
     ):
-        """Загрузить файл в MinIO и вернуть URL."""
         filename = await upload_file_to_minio(file, bucket="attachments")
         return {"url": filename}
     
@@ -124,7 +119,6 @@ class MessageAPI:
             self, 
             file_url
     ):
-        """Скачать файл из MinIO по URL."""
         return get_attachment_file(file_url)
     
     def add_chat_member(
@@ -132,7 +126,6 @@ class MessageAPI:
             request: AddUserRequest, 
             chat_user_service: ChatUserService = Depends(get_chat_user_service)
     ):
-        """Добавить пользователя в указанный чат."""
         return chat_user_service.chat_user_repo.add_user_to_chat(request.chat_id, request.user_id)
     
 
