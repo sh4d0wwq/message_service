@@ -6,3 +6,6 @@ python-jose
 pydantic
 pyjwt
 httpx
+websockets
+minio
+python-multipart

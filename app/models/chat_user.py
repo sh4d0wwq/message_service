@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey
 
-from db.database import Base
+from ..db.database import Base
 
 class ChatUser(Base):
     __tablename__ = "chat_user"
